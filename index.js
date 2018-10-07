@@ -16,7 +16,7 @@ module.exports = function AuraRangeNotify(dispatch) {
         if (!enabled) removeAllVisuals()
         if (enabled) {
             for (let member of auraMembers) {
-                applyVisual({gameId: JSON.parse(member)})
+                applyVisual(member)
             }
         }
     });
@@ -24,38 +24,35 @@ module.exports = function AuraRangeNotify(dispatch) {
     dispatch.hook('S_LOGIN', 10, (event) => {
         gameId = event.gameId;
         let job = (event.templateId - 10101) % 100;
-        enabled = (job === 7) ? true : false;
+        enabled = (job === 7)
         partyMembers = [{gameId: gameId}];
-        auraMembers = [];
     })
     
-    dispatch.hook('S_PARTY_MEMBER_LIST', 6, (event) => {
+    dispatch.hook('S_PARTY_MEMBER_LIST', 7, (event) => {
         partyMembers = event.members;
     })
     
-    dispatch.hook('S_LEAVE_PARTY', 1, (event) => {
+    dispatch.hook('S_LEAVE_PARTY', 'raw', () => {
         removeAllVisuals();
         partyMembers = [{gameId: gameId}];
-        let stringId = JSON.stringify(gameId)
-        if (auraMembers.includes(stringId)){
-            auraMembers=[stringId]
-            applyVisual({gameId: gameId})
-        }
-        else {
-            auraMembers=[]
+        for (let auraMember of auraMembers) {
+            if (auraMember.gameId.equals(gameId)) {
+                auraMembers = [auraMember]
+                return
+            }
         }
     })
 
-    dispatch.hook('S_ABNORMALITY_BEGIN', 2, (event) => {
+    dispatch.hook('S_ABNORMALITY_BEGIN', dispatch.base.majorPatchVersion >= 75 ? 3 : 2, (event) => {
         if (enabled && event.id == EffectId) return false
         for (let member of partyMembers) {
             if (member.gameId.equals(event.target)) {
                 if (auras.includes(event.id)) {
-                    let stringId = JSON.stringify(member.gameId)
-                    if (!auraMembers.includes(stringId)) {
-                        auraMembers.push(stringId)
-                        if (enabled) applyVisual(member)
+                    if (enabled) applyVisual(member)
+                    for (let auraMember of auraMembers) {
+                        if (auraMember.gameId.equals(member.gameId)) return
                     }
+                    auraMembers.push(member)
                 }
                 return
             }
@@ -67,11 +64,11 @@ module.exports = function AuraRangeNotify(dispatch) {
         for (let member of partyMembers) {
             if (member.gameId.equals(event.target)) {
                 if (auras.includes(event.id)) {
-                    let stringId = JSON.stringify(member.gameId)
-                    if (!auraMembers.includes(stringId)) {
-                        auraMembers.push(stringId)
-                        if (enabled) applyVisual(member)
+                    if (enabled) applyVisual(member)
+                    for (let auraMember of auraMembers) {
+                        if (auraMember.gameId.equals(member.gameId)) return
                     }
+                    auraMembers.push(member)
                 }
                 return
             }
@@ -83,10 +80,12 @@ module.exports = function AuraRangeNotify(dispatch) {
         for (let member of partyMembers) {
             if (member.gameId.equals(event.target)) {
                 if (auras.includes(event.id)) {
-                    let stringId = JSON.stringify(member.gameId)
-                    if (auraMembers.includes(stringId)) {
-                        auraMembers.splice(auraMembers.indexOf(stringId), 1)
-                        if (enabled) removeVisual(member)
+                    if (enabled) removeVisual(member)
+                    for (let auraMember of auraMembers) {
+                        if (auraMember.gameId.equals(member.gameId)) {
+                            auraMembers.splice(auraMembers.indexOf(auraMember),1)
+                            return
+                        }
                     }
                 }
                 return
@@ -99,7 +98,7 @@ module.exports = function AuraRangeNotify(dispatch) {
             target: member.gameId,
             id: EffectId
         });
-        dispatch.toClient('S_ABNORMALITY_BEGIN', 2, {
+        dispatch.toClient('S_ABNORMALITY_BEGIN', dispatch.base.majorPatchVersion >= 75 ? 3 : 2, {
             target: member.gameId,
             source: gameId,
             id: EffectId,
