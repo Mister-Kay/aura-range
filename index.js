@@ -1,125 +1,97 @@
-const Command = require('command');
-
-module.exports = function AuraRangeNotify(dispatch) {
-    const command = Command(dispatch);
+module.exports = function AuraRange(dispatch) {
+    const command = dispatch.command || dispatch.require.command
     const auras = [700230,700231,700232,700233,700330,700630,700631,700730,700731,601,602,603];
     const EffectId = 90520;
     
     let enabled = false,
-    partyMembers = [],
-    auraMembers = [],
+    partyMembers,
     gameId;
     
     command.add(['aurarange','aura-range', 'aura', 'auras', 'ar'], ()=> {
         enabled = !enabled;
         command.message('(aura-range) ' + (enabled ? 'enabled' : 'disabled'));
-        if (!enabled) removeAllVisuals()
-        if (enabled) {
-            for (let member of auraMembers) {
-                applyVisual(member)
+        partyMembers.forEach((member, value) => {
+            if (value) {
+                if (enabled) applyVisual(member)
+                else removeVisual(member)
             }
-        }
+        })
     });
     
     dispatch.hook('S_LOGIN', 10, (event) => {
         gameId = event.gameId;
         let job = (event.templateId - 10101) % 100;
         enabled = (job === 7)
-        partyMembers = [{gameId: gameId}];
+        partyMembers = new Map([[gameId, false]])
     })
     
+    // update party members on member change
     dispatch.hook('S_PARTY_MEMBER_LIST', 7, (event) => {
-        partyMembers = event.members;
+        // new map of current party
+        let tempMap = new Map()
+        for (let {gameId} of event.members) {
+            tempMap.set(gameId, partyMembers.get(gameId) || false)
+        }
+        // remove visual from old party
+        partyMembers.forEach((member, value)=>{
+            if (value && !tempMap.has(member)) removeVisual(member)
+        })
+        partyMembers = tempMap
     })
     
+    // update party members on leaving party
     dispatch.hook('S_LEAVE_PARTY', 'raw', () => {
-        removeAllVisuals();
-        partyMembers = [{gameId: gameId}];
-        for (let auraMember of auraMembers) {
-            if (auraMember.gameId.equals(gameId)) {
-                auraMembers = [auraMember]
-                return
-            }
-        }
+        partyMembers.forEach((member, value) => {
+            if (value && member != gameId) removeVisual(member)
+        })
+        partyMembers = new Map([[gameId, partyMembers.get(gameId)]])
     })
 
-    dispatch.hook('S_ABNORMALITY_BEGIN', dispatch.base.majorPatchVersion >= 75 ? 3 : 2, (event) => {
-        if (enabled && event.id == EffectId) return false
-        for (let member of partyMembers) {
-            if (member.gameId.equals(event.target)) {
-                if (auras.includes(event.id)) {
-                    if (enabled) applyVisual(member)
-                    for (let auraMember of auraMembers) {
-                        if (auraMember.gameId.equals(member.gameId)) return
-                    }
-                    auraMembers.push(member)
-                }
-                return
+    // S_ABNORMALITY_BEGIN
+    dispatch.hook('S_ABNORMALITY_BEGIN', 3, sAbnormal)
+
+    // S_ABNORMALITY_REFRESH
+    dispatch.hook('S_ABNORMALITY_REFRESH', 1, sAbnormal)
+
+    function sAbnormal(event) {
+        if (enabled) {
+            if (event.id == EffectId) return false
+            if (partyMembers.has(event.target) && !partyMembers.get(event.target) && auras.includes(event.id)) {
+                partyMembers.set(event.target, true)
+                applyVisual(event.target)
             }
         }
-    })
+    }
 
-    dispatch.hook('S_ABNORMALITY_REFRESH', 1, (event) => {
-        if (enabled && event.id == EffectId) return false
-        for (let member of partyMembers) {
-            if (member.gameId.equals(event.target)) {
-                if (auras.includes(event.id)) {
-                    if (enabled) applyVisual(member)
-                    for (let auraMember of auraMembers) {
-                        if (auraMember.gameId.equals(member.gameId)) return
-                    }
-                    auraMembers.push(member)
-                }
-                return
-            }
-        }
-    })
-
+    // S_ABNORMALITY_END
     dispatch.hook('S_ABNORMALITY_END', 1, (event) => {
-        if (enabled && event.id == EffectId) return false
-        for (let member of partyMembers) {
-            if (member.gameId.equals(event.target)) {
-                if (auras.includes(event.id)) {
-                    if (enabled) removeVisual(member)
-                    for (let auraMember of auraMembers) {
-                        if (auraMember.gameId.equals(member.gameId)) {
-                            auraMembers.splice(auraMembers.indexOf(auraMember),1)
-                            return
-                        }
-                    }
-                }
-                return
+        if (enabled) {
+            if (event.id == EffectId) return false
+            if (partyMembers.get(event.target) && auras.includes(event.id)) {
+                partyMembers.set(event.target, false)
+                removeVisual(event.target)
             }
         }
     })
-    
-    function applyVisual(member) {
-        dispatch.toClient('S_ABNORMALITY_END', 1, {
-            target: member.gameId,
-            id: EffectId
-        });
-        dispatch.toClient('S_ABNORMALITY_BEGIN', dispatch.base.majorPatchVersion >= 75 ? 3 : 2, {
-            target: member.gameId,
+
+    // add visual effect
+    function applyVisual(target) {
+        dispatch.toClient('S_ABNORMALITY_BEGIN', 3, {
+            target: target,
             source: gameId,
             id: EffectId,
             duration: 0,
             unk: 0,
             stacks: 1,
             unk2: 0
-        });
+        })
     }
-    
-    function removeVisual(member) {
+
+    // remove visual effect
+    function removeVisual(target) {
         dispatch.toClient('S_ABNORMALITY_END', 1, {
-            target: member.gameId,
+            target: target,
             id: EffectId
-        });	
+        })
     }
-    
-    function removeAllVisuals() {
-        for(let i = 0; i < partyMembers.length; i++) {
-            removeVisual(partyMembers[i]);
-        }
-    }
-    
 }
