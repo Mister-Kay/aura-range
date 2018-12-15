@@ -7,7 +7,7 @@ module.exports = function AuraRange(dispatch) {
     partyMembers,
     gameId;
     
-    command.add(['aurarange','aura-range', 'aura', 'auras', 'ar'], ()=> {
+    command.add(['aurarange', 'aura', 'ar'], ()=> {
         enabled = !enabled;
         command.message('(aura-range) ' + (enabled ? 'enabled' : 'disabled'));
         partyMembers.forEach((member, value) => {
@@ -18,7 +18,7 @@ module.exports = function AuraRange(dispatch) {
         })
     });
     
-    dispatch.hook('S_LOGIN', 10, (event) => {
+    dispatch.hook('S_LOGIN', 12, (event) => {
         gameId = event.gameId;
         let job = (event.templateId - 10101) % 100;
         enabled = (job === 7)

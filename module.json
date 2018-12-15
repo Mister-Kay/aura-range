@@ -1,5 +1,8 @@
 {
-	"disableAutoUpdate": false,
-	"servers": ["https://raw.githubusercontent.com/Mister-Kay/aura-range/master/"],
-	"supportUrl": "https://github.com/Mister-Kay/aura-range/issues"
+    "disableAutoUpdate": false,
+    "servers": ["https://raw.githubusercontent.com/Mister-Kay/aura-range/master/"],
+    "supportUrl": "https://github.com/Mister-Kay/aura-range/issues",
+    "name": "aura-range",
+    "author": "Mister-Kay",
+    "description": "Apply a visual effect on party members that have mystic auras when playing as mystic or manually enabled."
 }
