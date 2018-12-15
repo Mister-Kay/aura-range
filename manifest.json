@@ -1,9 +1,9 @@
 {
     "files": {
-        "README.MD": "923bce057ebffe2903927b2516c6a62fb452e2cbf76d3499e1f3e6828d3a173d",
+        "README.MD": "d842b7abfdb4cb56c3c54bc2559d49521251f08f30d289cfa9bf1ebcb9a05253",
         "README.url": "fa279dad2ed0805746b417a46325a80c4f39524ea7141c8ae27f3079eb92d8a9",
         "index.js": "c350b50292a7ebea93fa75f5efaf08954d8a5097c0103396a636ef808f22afa3",
-        "module.json": "8d4962f4fe724c40f07b9fc5435734abcdec9459362b2e47f885eccaf52a0c7c"
+        "module.json": "bfe962ee432616f5a2b11d2f7f06ef809f64f3990fed9b9477c74de06f561086"
     },
     "defs": {
         "S_ABNORMALITY_BEGIN": 3,

@@ -6,7 +6,7 @@ Applies a visual effect on party members that have mystic auras when playing as 
 - Requires "Effects Distance" 2 or greater in "Video" tab in "Options" window. Greater than 2 required for Harrowhold's buffed distance (unsure if Effects Distance needs to be 3 or 4)
 
 ## Usage
-### `ar`,`aura`,`auras`,`aurarange`, or `aura-range`
+### `ar`,`aura`, or `aurarange`
 - Toggle on/off
 
 ---
