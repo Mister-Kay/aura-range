@@ -10,7 +10,7 @@ module.exports = function AuraRange(dispatch) {
     command.add(['aurarange', 'aura', 'ar'], ()=> {
         enabled = !enabled;
         command.message('(aura-range) ' + (enabled ? 'enabled' : 'disabled'));
-        partyMembers.forEach((member, value) => {
+        partyMembers.forEach((value, member) => {
             if (value) {
                 if (enabled) applyVisual(member)
                 else removeVisual(member)
@@ -41,7 +41,7 @@ module.exports = function AuraRange(dispatch) {
     
     // update party members on leaving party
     dispatch.hook('S_LEAVE_PARTY', 'raw', () => {
-        partyMembers.forEach((member, value) => {
+        partyMembers.forEach((value, member) => {
             if (value && member != gameId) removeVisual(member)
         })
         partyMembers = new Map([[gameId, partyMembers.get(gameId)]])
