@@ -33,7 +33,7 @@ module.exports = function AuraRange(dispatch) {
             tempMap.set(gameId, partyMembers.get(gameId) || false)
         }
         // remove visual from old party
-        partyMembers.forEach((member, value)=>{
+        partyMembers.forEach((value, member)=>{
             if (value && !tempMap.has(member)) removeVisual(member)
         })
         partyMembers = tempMap
