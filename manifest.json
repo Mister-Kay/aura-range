@@ -2,15 +2,15 @@
     "files": {
         "README.MD": "d842b7abfdb4cb56c3c54bc2559d49521251f08f30d289cfa9bf1ebcb9a05253",
         "README.url": "fa279dad2ed0805746b417a46325a80c4f39524ea7141c8ae27f3079eb92d8a9",
-        "index.js": "8582347dbe956a017ab57c0d89153d930e607fa35a45ba513ed70148964e52c1",
+        "index.js": "d1171c2838ff0814acf5e73bf8fbcc73b80ebd0fe8deedf636a912a9bc6207e1",
         "module.json": "bfe962ee432616f5a2b11d2f7f06ef809f64f3990fed9b9477c74de06f561086"
     },
     "defs": {
-        "S_ABNORMALITY_BEGIN": 3,
+        "S_ABNORMALITY_BEGIN": 4,
         "S_ABNORMALITY_END": 1,
-        "S_ABNORMALITY_REFRESH": 1,
+        "S_ABNORMALITY_REFRESH": 2,
         "S_LEAVE_PARTY": "raw",
-        "S_LOGIN": 13,
+        "S_LOGIN": [13,14],
         "S_PARTY_MEMBER_LIST": 7
     }
 }

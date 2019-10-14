@@ -18,7 +18,7 @@ module.exports = function AuraRange(dispatch) {
         })
     });
     
-    dispatch.hook('S_LOGIN', 13, (event) => {
+    dispatch.hook('S_LOGIN', dispatch.majorPatchVersion < 86 ? 13 : 14, (event) => {
         gameId = event.gameId;
         let job = (event.templateId - 10101) % 100;
         enabled = (job === 7)
@@ -48,10 +48,10 @@ module.exports = function AuraRange(dispatch) {
     })
 
     // S_ABNORMALITY_BEGIN
-    dispatch.hook('S_ABNORMALITY_BEGIN', 3, sAbnormal)
+    dispatch.hook('S_ABNORMALITY_BEGIN', 4, sAbnormal)
 
     // S_ABNORMALITY_REFRESH
-    dispatch.hook('S_ABNORMALITY_REFRESH', 1, sAbnormal)
+    dispatch.hook('S_ABNORMALITY_REFRESH', 2, sAbnormal)
 
     function sAbnormal(event) {
         if (enabled) {
@@ -76,14 +76,12 @@ module.exports = function AuraRange(dispatch) {
 
     // add visual effect
     function applyVisual(target) {
-        dispatch.toClient('S_ABNORMALITY_BEGIN', 3, {
+        dispatch.toClient('S_ABNORMALITY_BEGIN', 4, {
             target: target,
             source: gameId,
             id: EffectId,
             duration: 0,
-            unk: 0,
             stacks: 1,
-            unk2: 0
         })
     }
 
